@@ -357,7 +357,7 @@ function reqToAppName(req) {
  */
 function spawnAsExec(command, options, cb) {
   var child = spawn('eval', [command], options);
-  child.stdout.on("data", (data) => {console.log(data)})
-  child.stderr.on("data", (data) => {console.error(data)})
+  child.stdout.on("data", process.stdout.write)
+  child.stderr.on("data", process.stderr.write)
   child.on('close', cb);
 }
