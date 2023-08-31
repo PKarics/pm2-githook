@@ -361,7 +361,7 @@ function spawnAsExec(command, options, cb) {
     console.log(command,':' + data);
   })
   child.stderr.on("data", (data) => {
-    console.error(command,':' + data);
+    console.log(command,':' + data);
   })
   child.on('close', cb);
 }
