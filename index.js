@@ -148,11 +148,13 @@ Worker.prototype.processRequest = function (req) {
         pm2.list((err, list) => {
           if(err) return cb(err)
 
-          for(let i = 0; i < list.length; i++) {
+          let isError = false;
+          for(let i = 0; i < list.length && !isError; i++) {
             pm2.reload(list[i],
               (err) => {
                 if(err) {
                   console.error(`Error during ${list[i]} process reload`, err);
+                  isError = true;
                   return cb(err);
                 }
                 console.log(`Successfuly reloaded application ${list[i]}`)
@@ -371,5 +373,7 @@ function reqToAppName(req) {
  */
 function spawnAsExec(command, options, cb) {
   var child = spawn('eval', [command], options);
+  child.stdout.on("data", console.log)
+  child.stderr.on("data", console.error)
   child.on('close', cb);
 }
