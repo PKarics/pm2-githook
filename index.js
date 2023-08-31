@@ -144,9 +144,28 @@ Worker.prototype.processRequest = function (req) {
     reloadApplication: function reloadApplication(cb) {
       if (targetApp.nopm2) return cb();
 
-      const reload = pm2.gracefulReload || pm2.reload
-      reload(targetName,
-	    logCallback(cb, '[%s] Successfuly reloaded application %s', new Date().toISOString(), targetName));
+      if(targetApp.workspace) {
+        pm2.list((err, list) => {
+          if(err) return cb(err)
+
+          for(let i = 0; i < list.length; i++) {
+            pm2.reload(list[i],
+              (err) => {
+                if(err) {
+                  console.error(`Error during ${list[i]} process reload`, err);
+                  return cb(err);
+                }
+                console.log(`Successfuly reloaded application ${list[i]}`)
+              }
+            );
+          }
+          cb();
+        })
+      }
+      else {
+        pm2.reload(targetName,
+          logCallback(cb, '[%s] Successfuly reloaded application %s', new Date().toISOString(), targetName));  
+      }
     },
     postHook: function postHook(cb) {
       if (!targetApp.posthook) return cb();
