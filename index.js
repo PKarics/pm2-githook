@@ -145,24 +145,8 @@ Worker.prototype.processRequest = function (req) {
       if (targetApp.nopm2) return cb();
 
       if(targetApp.workspace) {
-        pm2.list((err, list) => {
-          if(err) return cb(err)
-
-          let isError = false;
-          for(let i = 0; i < list.length && !isError; i++) {
-            pm2.reload(list[i],
-              (err) => {
-                if(err) {
-                  console.error(`Error during ${list[i]} process reload`, err);
-                  isError = true;
-                  return cb(err);
-                }
-                console.log(`Successfuly reloaded application ${list[i]}`)
-              }
-            );
-          }
-          cb();
-        })
+        pm2.reload("all",
+          logCallback(cb, '[%s] Successfuly reloaded all application!', new Date().toISOString())); 
       }
       else {
         pm2.reload(targetName,
@@ -373,7 +357,7 @@ function reqToAppName(req) {
  */
 function spawnAsExec(command, options, cb) {
   var child = spawn('eval', [command], options);
-  child.stdout.on("data", console.log)
-  child.stderr.on("data", console.error)
+  child.stdout.on("data", (data) => {console.log(data)})
+  child.stderr.on("data", (data) => {console.error(data)})
   child.on('close', cb);
 }
